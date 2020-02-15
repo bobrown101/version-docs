@@ -43,6 +43,7 @@ async function run(): Promise<void> {
       execSync(`git config --local user.name "GitHub Action"`)
       execSync(`git checkout ${docsBranch}`)
     } catch (error) {
+      console.log(execSync(`git branch -a`))
       console.error(error)
       const msg = `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`
       logError(msg)

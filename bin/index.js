@@ -1643,6 +1643,7 @@ function run() {
                 child_process_1.execSync(`git checkout ${docsBranch}`);
             }
             catch (error) {
+                console.log(child_process_1.execSync(`git branch -a`));
                 console.error(error);
                 const msg = `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`;
                 log_1.logError(msg);
