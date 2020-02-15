@@ -65,8 +65,10 @@ async function run(): Promise<void> {
 
     // Last we need to push the versioned resource to the target branch
     try {
+      console.log(JSON.stringify(process.env, null, 4))
       const githubActor = requireEnvVar('GITHUB_ACTOR')
       const githubToken = requireEnvVar('GITHUB_TOKEN')
+
       const repo = requireEnvVar('REPOSITORY')
       const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${repo}.git`
       execSync(`git push "${remoteRepo}" HEAD:${docsBranch}`)
