@@ -20,7 +20,7 @@ async function run(): Promise<void> {
     const root = '.'
     const out = '.'
     const source = core.getInput('doc-location')
-    const docsBranch = core.getInput('docsBranch')
+    const docsBranch = core.getInput('doc-branch')
     const commitMsg =
       core.getInput('commitMsg') || 'docs: versioned docs via version-docs'
 
