@@ -42,7 +42,7 @@ async function run(): Promise<void> {
       execSync(`git config --local user.email "action@github.com"`)
       execSync(`git config --local user.name "GitHub Action"`)
       execSync(`git fetch origin`)
-      execSync(`git checkout origin ${docsBranch}`)
+      execSync(`git checkout remotes/origin/${docsBranch}`)
     } catch (error) {
       console.log(execSync(`git branch -a`).toString())
       console.error(error)
