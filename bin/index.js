@@ -1667,7 +1667,7 @@ function run() {
                 console.log(JSON.stringify(process.env, null, 4));
                 const githubActor = requireEnvVar('GITHUB_ACTOR');
                 const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN');
-                const repo = requireEnvVar('REPOSITORY');
+                const repo = requireEnvVar('GITHUB_REPOSITORY');
                 const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${repo}.git`;
                 child_process_1.execSync(`git push "${remoteRepo}" HEAD:${docsBranch}`);
             }

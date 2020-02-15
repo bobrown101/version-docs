@@ -69,7 +69,7 @@ async function run(): Promise<void> {
       const githubActor = requireEnvVar('GITHUB_ACTOR')
       const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN')
 
-      const repo = requireEnvVar('REPOSITORY')
+      const repo = requireEnvVar('GITHUB_REPOSITORY')
       const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${repo}.git`
       execSync(`git push "${remoteRepo}" HEAD:${docsBranch}`)
     } catch (error) {
