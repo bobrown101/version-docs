@@ -26,6 +26,8 @@ async function run(): Promise<void> {
     const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`
     try {
       execSync(versionCommand)
+      const result = execSync('ls -al')
+      console.log(result.toString())
     } catch (error) {
       const msg = `The following command failed:\n ${versionCommand}`
       logError(msg)

@@ -1627,6 +1627,8 @@ function run() {
             const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`;
             try {
                 child_process_1.execSync(versionCommand);
+                const result = child_process_1.execSync('ls -al');
+                console.log(result.toString());
             }
             catch (error) {
                 const msg = `The following command failed:\n ${versionCommand}`;
