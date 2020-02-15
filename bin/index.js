@@ -1627,10 +1627,9 @@ function run() {
             const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`;
             try {
                 child_process_1.execSync(versionCommand);
-                const result = child_process_1.execSync('ls -al');
-                console.log(result.toString());
             }
             catch (error) {
+                console.error(error);
                 const msg = `The following command failed:\n ${versionCommand}`;
                 log_1.logError(msg);
                 core.setFailed(msg);
@@ -1644,7 +1643,6 @@ function run() {
                 child_process_1.execSync(`git checkout remotes/origin/${docsBranch}`);
             }
             catch (error) {
-                console.log(child_process_1.execSync(`git branch -a`).toString());
                 console.error(error);
                 const msg = `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`;
                 log_1.logError(msg);
@@ -1667,7 +1665,6 @@ function run() {
             }
             // Last we need to push the versioned resource to the target branch
             try {
-                console.log(JSON.stringify(process.env, null, 4));
                 const githubActor = requireEnvVar('GITHUB_ACTOR');
                 const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN');
                 const repo = requireEnvVar('GITHUB_REPOSITORY');
@@ -1681,6 +1678,8 @@ function run() {
                 core.setFailed(msg);
                 process.exit(1);
             }
+            const msg = `Successfully versioned docs!`;
+            log_1.logSuccess(msg);
         }
         catch (error) {
             core.setFailed(error.message);

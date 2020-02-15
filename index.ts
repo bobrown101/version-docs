@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import {execSync} from 'child_process'
-import {logError} from './log'
+import {logError, logSuccess} from './log'
 
 const requireEnvVar = (envVar: string): string => {
   const requested = process.env[envVar]
@@ -27,9 +27,8 @@ async function run(): Promise<void> {
     const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`
     try {
       execSync(versionCommand)
-      const result = execSync('ls -al')
-      console.log(result.toString())
     } catch (error) {
+      console.error(error)
       const msg = `The following command failed:\n ${versionCommand}`
       logError(msg)
       core.setFailed(msg)
@@ -44,7 +43,6 @@ async function run(): Promise<void> {
       execSync(`git fetch origin`)
       execSync(`git checkout remotes/origin/${docsBranch}`)
     } catch (error) {
-      console.log(execSync(`git branch -a`).toString())
       console.error(error)
       const msg = `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`
       logError(msg)
@@ -68,7 +66,6 @@ async function run(): Promise<void> {
 
     // Last we need to push the versioned resource to the target branch
     try {
-      console.log(JSON.stringify(process.env, null, 4))
       const githubActor = requireEnvVar('GITHUB_ACTOR')
       const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN')
 
@@ -82,6 +79,9 @@ async function run(): Promise<void> {
       core.setFailed(msg)
       process.exit(1)
     }
+
+    const msg = `Successfully versioned docs!`
+    logSuccess(msg)
   } catch (error) {
     core.setFailed(error.message)
   }
