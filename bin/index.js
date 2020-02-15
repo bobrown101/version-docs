@@ -1640,9 +1640,10 @@ function run() {
             try {
                 child_process_1.execSync(`git config --local user.email "action@github.com"`);
                 child_process_1.execSync(`git config --local user.name "GitHub Action"`);
-                child_process_1.execSync(`git checkout ${docsBranch}`);
+                child_process_1.execSync(`git checkout origin ${docsBranch}`);
             }
             catch (error) {
+                console.error(error);
                 const msg = `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`;
                 log_1.logError(msg);
                 core.setFailed(msg);
