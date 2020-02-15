@@ -21,7 +21,8 @@ async function run(): Promise<void> {
     const out = '.'
     const source = core.getInput('doc-location')
     const docsBranch = core.getInput('docsBranch')
-    const commitMsg = core.getInput('commitMsg')
+    const commitMsg =
+      core.getInput('commitMsg') || 'docs: versioned docs via version-docs'
 
     const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`
     try {
@@ -53,7 +54,7 @@ async function run(): Promise<void> {
       const gitRef = requireEnvVar('GITHUB_REF')
       const gitBranch = gitRef.split('/')[2]
       execSync(`git add ${gitBranch}`)
-      execSync(`git commit -m "${commitMsg}"`)
+      execSync(`git commit -m "${commitMsg}" --no-verify`)
     } catch (error) {
       console.error(error)
       const msg = `Could not commit versioned documentation`

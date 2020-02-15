@@ -1623,7 +1623,7 @@ function run() {
             const out = '.';
             const source = core.getInput('doc-location');
             const docsBranch = core.getInput('docsBranch');
-            const commitMsg = core.getInput('commitMsg');
+            const commitMsg = core.getInput('commitMsg') || 'docs: versioned docs via version-docs';
             const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`;
             try {
                 child_process_1.execSync(versionCommand);
@@ -1653,7 +1653,7 @@ function run() {
                 const gitRef = requireEnvVar('GITHUB_REF');
                 const gitBranch = gitRef.split('/')[2];
                 child_process_1.execSync(`git add ${gitBranch}`);
-                child_process_1.execSync(`git commit -m "${commitMsg}"`);
+                child_process_1.execSync(`git commit -m "${commitMsg}" --no-verify`);
             }
             catch (error) {
                 console.error(error);
