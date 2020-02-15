@@ -1640,7 +1640,7 @@ function run() {
             try {
                 child_process_1.execSync(`git config --local user.email "action@github.com"`);
                 child_process_1.execSync(`git config --local user.name "GitHub Action"`);
-                child_process_1.execSync(`git checkout origin ${docsBranch}`);
+                child_process_1.execSync(`git checkout ${docsBranch}`);
             }
             catch (error) {
                 console.error(error);

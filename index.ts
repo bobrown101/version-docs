@@ -41,7 +41,7 @@ async function run(): Promise<void> {
     try {
       execSync(`git config --local user.email "action@github.com"`)
       execSync(`git config --local user.name "GitHub Action"`)
-      execSync(`git checkout origin ${docsBranch}`)
+      execSync(`git checkout ${docsBranch}`)
     } catch (error) {
       console.error(error)
       const msg = `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`
