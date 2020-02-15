@@ -1,0 +1,21 @@
+name: 'version-docs'
+description: 'Automatically version and deploy your repository's docs'
+inputs:
+  doc-location:  # id of input
+    description: 'The location of the docs relative to the root of your repo'
+    required: true
+    default: 'docs'
+  doc-branch:
+    description: 'The branch on which to store your versioned documentation'
+    required: true
+    default: 'gh-pages'
+  commit-msg:
+    description: 'The branch on which to store your versioned documentation'
+    required: true
+    default: 'docs: versioned docs via version-docs'
+outputs:
+  time: # id of output
+    description: 'The time we greeted you'
+runs:
+  using: 'node12'
+  main: 'bin/index.js'
