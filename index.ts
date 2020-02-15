@@ -19,7 +19,7 @@ async function run(): Promise<void> {
     // First we need to version the resource
     const root = '.'
     const out = 'versionedResource'
-    const source = core.getInput('')
+    const source = core.getInput('doc-location')
     const docsBranch = core.getInput('docsBranch')
     const commitMsg = core.getInput('commitMsg')
 
