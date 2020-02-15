@@ -1,7 +1,7 @@
 name: 'version-docs'
-description: 'Automatically version and deploy your repository's docs'
+description: "Automatically version and deploy your repository's docs"
 inputs:
-  doc-location:  # id of input
+  doc-location:
     description: 'The location of the docs relative to the root of your repo'
     required: true
     default: 'docs'
@@ -14,7 +14,7 @@ inputs:
     required: true
     default: 'docs: versioned docs via version-docs'
 outputs:
-  time: # id of output
+  time:
     description: 'The time we greeted you'
 runs:
   using: 'node12'
