@@ -19,8 +19,8 @@ async function run(): Promise<void> {
     // First we need to version the resource
     const root = '.'
     const out = '.'
-    const source = core.getInput('INPUT_DOC-LOCATION')
-    const docsBranch = core.getInput('INPUT_DOC-BRANCH')
+    const source = core.getInput('doc-location')
+    const docsBranch = core.getInput('docsBranch')
     const commitMsg =
       core.getInput('commitMsg') || 'docs: versioned docs via version-docs'
 
@@ -65,6 +65,7 @@ async function run(): Promise<void> {
 
     // Last we need to push the versioned resource to the target branch
     try {
+      console.log(JSON.stringify(process.env, null, 4))
       const githubActor = requireEnvVar('GITHUB_ACTOR')
       const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN')
 

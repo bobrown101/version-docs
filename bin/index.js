@@ -1621,8 +1621,8 @@ function run() {
             // First we need to version the resource
             const root = '.';
             const out = '.';
-            const source = core.getInput('INPUT_DOC-LOCATION');
-            const docsBranch = core.getInput('INPUT_DOC-BRANCH');
+            const source = core.getInput('doc-location');
+            const docsBranch = core.getInput('docsBranch');
             const commitMsg = core.getInput('commitMsg') || 'docs: versioned docs via version-docs';
             const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`;
             try {
@@ -1664,6 +1664,7 @@ function run() {
             }
             // Last we need to push the versioned resource to the target branch
             try {
+                console.log(JSON.stringify(process.env, null, 4));
                 const githubActor = requireEnvVar('GITHUB_ACTOR');
                 const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN');
                 const repo = requireEnvVar('REPOSITORY');
