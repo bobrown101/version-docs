@@ -28,9 +28,9 @@ async function run(): Promise<void> {
 
     const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`
     try {
-      execSync(versionCommand)
-      execSync(`git add ${gitBranch}`)
-      execSync('git stash')
+      console.log(execSync(versionCommand).toString())
+      console.log(execSync(`git add ${gitBranch}`).toString())
+      console.log(execSync('git stash').toString())
     } catch (error) {
       console.error(error)
       const msg = `The following command failed:\n ${versionCommand}`
@@ -44,9 +44,9 @@ async function run(): Promise<void> {
     try {
       execSync(`git config --local user.email "action@github.com"`)
       execSync(`git config --local user.name "GitHub Action"`)
-      execSync(`git fetch origin`)
-      execSync(`git checkout remotes/origin/${docsBranch}`)
-      execSync('git stash pop')
+      console.log(execSync(`git fetch origin`).toString())
+      console.log(execSync(`git checkout remotes/origin/${docsBranch}`).toString())
+      console.log(execSync('git stash pop').toString())
     } catch (error) {
       console.error(error)
       const msg = `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`

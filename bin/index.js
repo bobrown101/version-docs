@@ -1628,9 +1628,9 @@ function run() {
             const gitBranch = gitRef.split('/')[2];
             const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`;
             try {
-                child_process_1.execSync(versionCommand);
-                child_process_1.execSync(`git add ${gitBranch}`);
-                child_process_1.execSync('git stash');
+                console.log(child_process_1.execSync(versionCommand).toString());
+                console.log(child_process_1.execSync(`git add ${gitBranch}`).toString());
+                console.log(child_process_1.execSync('git stash').toString());
             }
             catch (error) {
                 console.error(error);
@@ -1643,9 +1643,9 @@ function run() {
             try {
                 child_process_1.execSync(`git config --local user.email "action@github.com"`);
                 child_process_1.execSync(`git config --local user.name "GitHub Action"`);
-                child_process_1.execSync(`git fetch origin`);
-                child_process_1.execSync(`git checkout remotes/origin/${docsBranch}`);
-                child_process_1.execSync('git stash pop');
+                console.log(child_process_1.execSync(`git fetch origin`).toString());
+                console.log(child_process_1.execSync(`git checkout remotes/origin/${docsBranch}`).toString());
+                console.log(child_process_1.execSync('git stash pop').toString());
             }
             catch (error) {
                 console.error(error);
