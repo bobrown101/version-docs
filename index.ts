@@ -23,10 +23,13 @@ async function run(): Promise<void> {
     const docsBranch = core.getInput('doc-branch')
     const commitMsg =
       core.getInput('commitMsg') || 'docs: versioned docs via version-docs'
+    const gitRef = requireEnvVar('GITHUB_REF')
+    const gitBranch = gitRef.split('/')[2]
 
     const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`
     try {
       execSync(versionCommand)
+      execSync(`git add ${gitBranch}`)
       execSync('git stash')
     } catch (error) {
       console.error(error)
@@ -54,8 +57,6 @@ async function run(): Promise<void> {
 
     // Third we need to add and commit the versioned resource
     try {
-      const gitRef = requireEnvVar('GITHUB_REF')
-      const gitBranch = gitRef.split('/')[2]
       execSync(`git add ${gitBranch}`)
       execSync(`git commit -m "${commitMsg}" --no-verify`)
     } catch (error) {

@@ -1624,9 +1624,12 @@ function run() {
             const source = core.getInput('doc-location');
             const docsBranch = core.getInput('doc-branch');
             const commitMsg = core.getInput('commitMsg') || 'docs: versioned docs via version-docs';
+            const gitRef = requireEnvVar('GITHUB_REF');
+            const gitBranch = gitRef.split('/')[2];
             const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`;
             try {
                 child_process_1.execSync(versionCommand);
+                child_process_1.execSync(`git add ${gitBranch}`);
                 child_process_1.execSync('git stash');
             }
             catch (error) {
@@ -1653,8 +1656,6 @@ function run() {
             }
             // Third we need to add and commit the versioned resource
             try {
-                const gitRef = requireEnvVar('GITHUB_REF');
-                const gitBranch = gitRef.split('/')[2];
                 child_process_1.execSync(`git add ${gitBranch}`);
                 child_process_1.execSync(`git commit -m "${commitMsg}" --no-verify`);
             }
