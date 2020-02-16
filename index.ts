@@ -29,7 +29,7 @@ async function run(): Promise<void> {
     const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`
     try {
       console.log(execSync(versionCommand).toString())
-      console.log(execSync(`git add ${gitBranch} latest`).toString())
+      console.log(execSync(`git add ${gitBranch}`).toString())
       console.log(execSync('git stash').toString())
     } catch (error) {
       console.error(error)
@@ -51,6 +51,8 @@ async function run(): Promise<void> {
       console.log(execSync('git stash pop').toString())
     } catch (error) {
       console.error(error)
+      console.error(error.output.toString())
+      console.error(error.stdout.toString())
       const msg = `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`
       logError(msg)
       core.setFailed(msg)
@@ -59,7 +61,7 @@ async function run(): Promise<void> {
 
     // Third we need to add and commit the versioned resource
     try {
-      execSync(`git add ${gitBranch} latest`)
+      execSync(`git add ${gitBranch}`)
       execSync(`git commit -m "${commitMsg}" --no-verify`)
     } catch (error) {
       console.error(error)

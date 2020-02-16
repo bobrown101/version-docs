@@ -1629,7 +1629,7 @@ function run() {
             const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`;
             try {
                 console.log(child_process_1.execSync(versionCommand).toString());
-                console.log(child_process_1.execSync(`git add ${gitBranch} latest`).toString());
+                console.log(child_process_1.execSync(`git add ${gitBranch}`).toString());
                 console.log(child_process_1.execSync('git stash').toString());
             }
             catch (error) {
@@ -1649,6 +1649,8 @@ function run() {
             }
             catch (error) {
                 console.error(error);
+                console.error(error.output.toString());
+                console.error(error.stdout.toString());
                 const msg = `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`;
                 log_1.logError(msg);
                 core.setFailed(msg);
@@ -1656,7 +1658,7 @@ function run() {
             }
             // Third we need to add and commit the versioned resource
             try {
-                child_process_1.execSync(`git add ${gitBranch} latest`);
+                child_process_1.execSync(`git add ${gitBranch}`);
                 child_process_1.execSync(`git commit -m "${commitMsg}" --no-verify`);
             }
             catch (error) {
