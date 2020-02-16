@@ -29,7 +29,7 @@ async function run(): Promise<void> {
     const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`
     try {
       console.log(execSync(versionCommand).toString())
-      console.log(execSync(`git add ${gitBranch}`).toString())
+      console.log(execSync(`git add ${gitBranch} latest`).toString())
       console.log(execSync('git stash').toString())
     } catch (error) {
       console.error(error)
@@ -45,7 +45,9 @@ async function run(): Promise<void> {
       execSync(`git config --local user.email "action@github.com"`)
       execSync(`git config --local user.name "GitHub Action"`)
       console.log(execSync(`git fetch origin`).toString())
-      console.log(execSync(`git checkout remotes/origin/${docsBranch}`).toString())
+      console.log(
+        execSync(`git checkout remotes/origin/${docsBranch}`).toString()
+      )
       console.log(execSync('git stash pop').toString())
     } catch (error) {
       console.error(error)
@@ -57,7 +59,7 @@ async function run(): Promise<void> {
 
     // Third we need to add and commit the versioned resource
     try {
-      execSync(`git add ${gitBranch}`)
+      execSync(`git add ${gitBranch} latest`)
       execSync(`git commit -m "${commitMsg}" --no-verify`)
     } catch (error) {
       console.error(error)
