@@ -48,7 +48,7 @@ async function run(): Promise<void> {
       console.log(
         execSync(`git checkout remotes/origin/${docsBranch}`).toString()
       )
-      console.log(execSync('git stash pop').toString())
+      console.log(execSync('git checkout stash -- .').toString())
     } catch (error) {
       console.error(error)
       console.error(error.output.toString())

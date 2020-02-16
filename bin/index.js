@@ -1645,7 +1645,7 @@ function run() {
                 child_process_1.execSync(`git config --local user.name "GitHub Action"`);
                 console.log(child_process_1.execSync(`git fetch origin`).toString());
                 console.log(child_process_1.execSync(`git checkout remotes/origin/${docsBranch}`).toString());
-                console.log(child_process_1.execSync('git stash pop').toString());
+                console.log(child_process_1.execSync('git checkout stash -- .').toString());
             }
             catch (error) {
                 console.error(error);
