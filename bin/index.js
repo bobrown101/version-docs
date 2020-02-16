@@ -1647,7 +1647,7 @@ function run() {
             runCommand(`git commit -m "${commitMsg}" --no-verify`);
             runCommand(`git fetch origin`);
             runCommand(`git checkout remotes/origin/${docsBranch}`, `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`);
-            runCommand(`git cherry-pick temp/version-docs`);
+            runCommand(`git cherry-pick temp/version-docs --strategy-option=theirs`);
             const githubActor = requireEnvVar('GITHUB_ACTOR');
             const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN');
             const repo = requireEnvVar('GITHUB_REPOSITORY');

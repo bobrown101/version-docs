@@ -14,7 +14,7 @@ const requireEnvVar = (envVar: string): string => {
   }
 }
 
-const runCommand = (cmd: string, errorMsg?: string) => {
+const runCommand = (cmd: string, errorMsg?: string): void => {
   try {
     console.log(execSync(cmd).toString())
   } catch (error) {
@@ -53,7 +53,7 @@ async function run(): Promise<void> {
       `git checkout remotes/origin/${docsBranch}`,
       `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`
     )
-    runCommand(`git cherry-pick temp/version-docs`)
+    runCommand(`git cherry-pick temp/version-docs --strategy-option=theirs`)
 
     const githubActor = requireEnvVar('GITHUB_ACTOR')
     const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN')
