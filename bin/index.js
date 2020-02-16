@@ -1615,6 +1615,18 @@ const requireEnvVar = (envVar) => {
         process.exit(1);
     }
 };
+const runCommand = (cmd, errorMsg) => {
+    try {
+        console.log(child_process_1.execSync(cmd).toString());
+    }
+    catch (error) {
+        console.error(error);
+        const msg = errorMsg || error.toString();
+        log_1.logError(msg);
+        core.setFailed(msg);
+        process.exit(1);
+    }
+};
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -1626,65 +1638,22 @@ function run() {
             const commitMsg = core.getInput('commitMsg') || 'docs: versioned docs via version-docs';
             const gitRef = requireEnvVar('GITHUB_REF');
             const gitBranch = gitRef.split('/')[2];
+            runCommand(`git config --local user.email "action@github.com"`);
+            runCommand(`git config --local user.name "GitHub Action"`);
             const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`;
-            try {
-                console.log(child_process_1.execSync(versionCommand).toString());
-                console.log(child_process_1.execSync(`git add ${gitBranch}`).toString());
-                console.log(child_process_1.execSync('git stash').toString());
-            }
-            catch (error) {
-                console.error(error);
-                const msg = `The following command failed:\n ${versionCommand}`;
-                log_1.logError(msg);
-                core.setFailed(msg);
-                process.exit(1);
-            }
-            // Second we need to checkout to the target branch
-            try {
-                child_process_1.execSync(`git config --local user.email "action@github.com"`);
-                child_process_1.execSync(`git config --local user.name "GitHub Action"`);
-                console.log(child_process_1.execSync(`git fetch origin`).toString());
-                console.log(child_process_1.execSync(`git checkout remotes/origin/${docsBranch}`).toString());
-                console.log(child_process_1.execSync('git checkout stash -- .').toString());
-            }
-            catch (error) {
-                console.error(error);
-                console.error(error.output.toString());
-                console.error(error.stdout.toString());
-                const msg = `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`;
-                log_1.logError(msg);
-                core.setFailed(msg);
-                process.exit(1);
-            }
-            // Third we need to add and commit the versioned resource
-            try {
-                child_process_1.execSync(`git add ${gitBranch}`);
-                child_process_1.execSync(`git commit -m "${commitMsg}" --no-verify`);
-            }
-            catch (error) {
-                console.error(error);
-                const msg = `Could not commit versioned documentation`;
-                log_1.logError(msg);
-                core.setFailed(msg);
-                process.exit(1);
-            }
-            // Last we need to push the versioned resource to the target branch
-            try {
-                const githubActor = requireEnvVar('GITHUB_ACTOR');
-                const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN');
-                const repo = requireEnvVar('GITHUB_REPOSITORY');
-                const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${repo}.git`;
-                child_process_1.execSync(`git push "${remoteRepo}" HEAD:${docsBranch}`);
-            }
-            catch (error) {
-                console.error(error);
-                const msg = `Could not push docs to docsBranch ${docsBranch}`;
-                log_1.logError(msg);
-                core.setFailed(msg);
-                process.exit(1);
-            }
-            const msg = `Successfully versioned docs!`;
-            log_1.logSuccess(msg);
+            runCommand(versionCommand);
+            runCommand(`git checkout -b temp/version-docs`);
+            runCommand(`git add ${gitBranch}`);
+            runCommand(`git commit -m "${commitMsg}" --no-verify`);
+            runCommand(`git fetch origin`);
+            runCommand(`git checkout remotes/origin/${docsBranch}`, `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`);
+            runCommand(`git cherry-pick temp/version-docs`);
+            const githubActor = requireEnvVar('GITHUB_ACTOR');
+            const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN');
+            const repo = requireEnvVar('GITHUB_REPOSITORY');
+            const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${repo}.git`;
+            runCommand(`git push "${remoteRepo}" HEAD:${docsBranch}`, `Could not push docs to docsBranch ${docsBranch}`);
+            log_1.logSuccess(`Successfully versioned docs!`);
         }
         catch (error) {
             core.setFailed(error.message);
