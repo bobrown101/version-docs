@@ -1627,6 +1627,7 @@ function run() {
             const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`;
             try {
                 child_process_1.execSync(versionCommand);
+                child_process_1.execSync('git stash');
             }
             catch (error) {
                 console.error(error);
@@ -1641,6 +1642,7 @@ function run() {
                 child_process_1.execSync(`git config --local user.name "GitHub Action"`);
                 child_process_1.execSync(`git fetch origin`);
                 child_process_1.execSync(`git checkout remotes/origin/${docsBranch}`);
+                child_process_1.execSync('git stash pop');
             }
             catch (error) {
                 console.error(error);

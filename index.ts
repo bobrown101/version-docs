@@ -27,6 +27,7 @@ async function run(): Promise<void> {
     const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`
     try {
       execSync(versionCommand)
+      execSync('git stash')
     } catch (error) {
       console.error(error)
       const msg = `The following command failed:\n ${versionCommand}`
@@ -42,6 +43,7 @@ async function run(): Promise<void> {
       execSync(`git config --local user.name "GitHub Action"`)
       execSync(`git fetch origin`)
       execSync(`git checkout remotes/origin/${docsBranch}`)
+      execSync('git stash pop')
     } catch (error) {
       console.error(error)
       const msg = `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`
