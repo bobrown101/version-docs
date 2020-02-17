@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import {execSync} from 'child_process'
+import axios from 'axios'
 import {logError, logSuccess} from './log'
 
 const requireEnvVar = (envVar: string): string => {
@@ -14,9 +15,11 @@ const requireEnvVar = (envVar: string): string => {
   }
 }
 
-const runCommand = (cmd: string, errorMsg?: string): void => {
+const runCommand = (cmd: string, errorMsg?: string): string => {
   try {
-    console.log(execSync(cmd).toString())
+    const result = execSync(cmd).toString()
+    console.log(result)
+    return result
   } catch (error) {
     console.error(error)
     const msg = errorMsg || error.toString()
@@ -24,6 +27,30 @@ const runCommand = (cmd: string, errorMsg?: string): void => {
     core.setFailed(msg)
     process.exit(1)
   }
+}
+
+const commentOnCommit = async (
+  comment: string,
+  token: string
+): Promise<void> => {
+  const inputs = {
+    token,
+    body: comment
+  }
+  core.debug(`Inputs: ${JSON.stringify(inputs, null, 4)}`)
+
+  const sha = process.env.GITHUB_SHA
+  core.debug(`SHA: ${sha}`)
+
+  await axios.post(
+    `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/commits/${sha}/comments`,
+    {
+      body: inputs.body
+    },
+    {
+      headers: {authorization: `token ${inputs.token}`}
+    }
+  )
 }
 
 async function run(): Promise<void> {
@@ -63,6 +90,11 @@ async function run(): Promise<void> {
     runCommand(
       `git push "${remoteRepo}" HEAD:${docsBranch}`,
       `Could not push docs to docsBranch ${docsBranch}`
+    )
+
+    commentOnCommit(
+      `"version-docs" versioned "${source}" from branch "${gitBranch}" on documentation branch "${docsBranch}"`,
+      githubToken
     )
 
     logSuccess(`Successfully versioned docs!`)
