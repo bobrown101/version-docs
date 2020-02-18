@@ -68,7 +68,7 @@ async function run(): Promise<void> {
     runCommand(`git config --local user.email "action@github.com"`)
     runCommand(`git config --local user.name "GitHub Action"`)
 
-    const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out}`
+    const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out} -p`
     runCommand(versionCommand)
 
     runCommand(`git checkout -b temp/version-docs`)
