@@ -4532,6 +4532,14 @@ function run() {
             runCommand(versionCommand);
             runCommand(`git checkout -b temp/version-docs`);
             runCommand(`git add ${gitBranch}`);
+            // add index.html as this will allow for --pilot flag of version-resource
+            // add .version-resource-history to allow for correct pilot file generation
+            try {
+                child_process_1.execSync(`git add index.html .version-resource-history`);
+            }
+            catch (error) {
+                log_1.logInfo("Could not find index.html and/or .version-resource-history file - this would most likely happen if no -p flag was specified, or this is the first time version-docs has been run wuth the -p flag. Ignoring...");
+            }
             runCommand(`git commit -m "${commitMsg}" --no-verify`);
             runCommand(`git fetch origin`);
             runCommand(`git checkout remotes/origin/${docsBranch}`, `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`);
