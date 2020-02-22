@@ -77,6 +77,7 @@ async function run(): Promise<void> {
     // add .version-resource-history to allow for correct pilot file generation
     try {
       execSync(`git add index.html .version-resource-history`)
+      runCommand(`git status`)
     } catch (error) {
       logInfo(
         'Could not find index.html and/or .version-resource-history file - this would most likely happen if no -p flag was specified, or this is the first time version-docs has been run wuth the -p flag. Ignoring...'
