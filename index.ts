@@ -54,7 +54,7 @@ async function run(): Promise<void> {
     try {
       const gitRef = requireEnvVar('GITHUB_REF')
       const gitBranch = gitRef.split('/')[2]
-      execSync(`git add ${gitBranch}`)
+      execSync(`git add ${gitBranch} -f`) // -f is required because people will commonly ignore doc files in .gitignore, but we actually want it here
       execSync(`git commit -m "${commitMsg}" --no-verify`)
     } catch (error) {
       console.error(error)

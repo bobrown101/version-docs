@@ -1653,7 +1653,7 @@ function run() {
             try {
                 const gitRef = requireEnvVar('GITHUB_REF');
                 const gitBranch = gitRef.split('/')[2];
-                child_process_1.execSync(`git add ${gitBranch}`);
+                child_process_1.execSync(`git add ${gitBranch} -f`); // -f is required because people will commonly ignore doc files in .gitignore, but we actually want it here
                 child_process_1.execSync(`git commit -m "${commitMsg}" --no-verify`);
             }
             catch (error) {
