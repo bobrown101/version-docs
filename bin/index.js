@@ -4359,7 +4359,6 @@ const commentOnCommit = (comment, token) => __awaiter(void 0, void 0, void 0, fu
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            console.log(child_process_1.execSync(`cat .version-resource-history`).toString());
             // First we need to version the resource
             const root = '.';
             const out = '.';
@@ -4368,15 +4367,21 @@ function run() {
             const commitMsg = core.getInput('commitMsg') || 'docs: versioned docs via version-docs';
             const gitRef = requireEnvVar('GITHUB_REF');
             const gitBranch = gitRef.split('/')[2];
+            const gitCommit = runCommand(`git log -1 --format="%h"`);
             runCommand(`git config --local user.email "action@github.com"`);
             runCommand(`git config --local user.name "GitHub Action"`);
-            const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out} -p`;
-            runCommand(versionCommand);
-            runCommand(`git checkout -b temp/version-docs`);
-            runCommand(`git add ${gitBranch}/* -f`); // -f is required because people will commonly ignore doc files in .gitignore, but we actually want it here
-            // add index.html as this will allow for --pilot flag of version-resource
-            // add .version-resource-history to allow for correct pilot file generation
+            runCommand(`git fetch origin`);
+            runCommand(`git checkout remotes/origin/${docsBranch}`, `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`);
+            const versionResource = (versionName, versionTag) => {
+                const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out} --versionName ${versionName} --versionTag ${versionTag} -p`;
+                runCommand(versionCommand);
+            };
+            versionResource(gitBranch, gitCommit);
+            versionResource(gitBranch, 'latest');
+            runCommand(`git add ${gitBranch}/*`);
             try {
+                // add index.html as this will allow for --pilot flag of version-resource
+                // add .version-resource-history to allow for correct pilot file generation
                 child_process_1.execSync(`git add index.html .version-resource-history`);
                 runCommand(`git status`);
             }
@@ -4384,9 +4389,6 @@ function run() {
                 log_1.logInfo('Could not find index.html and/or .version-resource-history file - this would most likely happen if no -p flag was specified, or this is the first time version-docs has been run wuth the -p flag. Ignoring...');
             }
             runCommand(`git commit -m "${commitMsg}" --no-verify`);
-            runCommand(`git fetch origin`);
-            runCommand(`git checkout remotes/origin/${docsBranch}`, `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`);
-            runCommand(`git cherry-pick temp/version-docs --strategy-option=theirs`);
             const githubActor = requireEnvVar('GITHUB_ACTOR');
             const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN');
             const repo = requireEnvVar('GITHUB_REPOSITORY');
@@ -4394,7 +4396,6 @@ function run() {
             runCommand(`git push "${remoteRepo}" HEAD:${docsBranch}`, `Could not push docs to docsBranch ${docsBranch}`);
             commentOnCommit(`"version-docs" versioned "${source}" from branch "${gitBranch}" on documentation branch "${docsBranch}"`, githubToken);
             log_1.logSuccess(`Successfully versioned docs!`);
-            console.log(child_process_1.execSync(`cat .version-resource-history`).toString());
         }
         catch (error) {
             core.setFailed(error.message);

@@ -55,7 +55,6 @@ const commentOnCommit = async (
 
 async function run(): Promise<void> {
   try {
-    console.log(execSync(`cat .version-resource-history`).toString())
     // First we need to version the resource
     const root = '.'
     const out = '.'
@@ -65,18 +64,29 @@ async function run(): Promise<void> {
       core.getInput('commitMsg') || 'docs: versioned docs via version-docs'
     const gitRef = requireEnvVar('GITHUB_REF')
     const gitBranch = gitRef.split('/')[2]
+    const gitCommit = runCommand(`git log -1 --format="%h"`)
 
     runCommand(`git config --local user.email "action@github.com"`)
     runCommand(`git config --local user.name "GitHub Action"`)
 
-    const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out} -p`
-    runCommand(versionCommand)
+    runCommand(`git fetch origin`)
+    runCommand(
+      `git checkout remotes/origin/${docsBranch}`,
+      `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`
+    )
 
-    runCommand(`git checkout -b temp/version-docs`)
-    runCommand(`git add ${gitBranch}/* -f`) // -f is required because people will commonly ignore doc files in .gitignore, but we actually want it here
-    // add index.html as this will allow for --pilot flag of version-resource
-    // add .version-resource-history to allow for correct pilot file generation
+    const versionResource = (versionName: string, versionTag: string): void => {
+      const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out} --versionName ${versionName} --versionTag ${versionTag} -p`
+      runCommand(versionCommand)
+    }
+    versionResource(gitBranch, gitCommit)
+    versionResource(gitBranch, 'latest')
+
+    runCommand(`git add ${gitBranch}/*`)
+
     try {
+      // add index.html as this will allow for --pilot flag of version-resource
+      // add .version-resource-history to allow for correct pilot file generation
       execSync(`git add index.html .version-resource-history`)
       runCommand(`git status`)
     } catch (error) {
@@ -85,13 +95,6 @@ async function run(): Promise<void> {
       )
     }
     runCommand(`git commit -m "${commitMsg}" --no-verify`)
-
-    runCommand(`git fetch origin`)
-    runCommand(
-      `git checkout remotes/origin/${docsBranch}`,
-      `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`
-    )
-    runCommand(`git cherry-pick temp/version-docs --strategy-option=theirs`)
 
     const githubActor = requireEnvVar('GITHUB_ACTOR')
     const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN')
@@ -109,8 +112,6 @@ async function run(): Promise<void> {
     )
 
     logSuccess(`Successfully versioned docs!`)
-    console.log(execSync(`cat .version-resource-history`).toString())
-
   } catch (error) {
     core.setFailed(error.message)
   }
