@@ -4359,6 +4359,7 @@ const commentOnCommit = (comment, token) => __awaiter(void 0, void 0, void 0, fu
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            console.log(child_process_1.execSync(`cat .version-resource-history`).toString());
             // First we need to version the resource
             const root = '.';
             const out = '.';
@@ -4393,6 +4394,7 @@ function run() {
             runCommand(`git push "${remoteRepo}" HEAD:${docsBranch}`, `Could not push docs to docsBranch ${docsBranch}`);
             commentOnCommit(`"version-docs" versioned "${source}" from branch "${gitBranch}" on documentation branch "${docsBranch}"`, githubToken);
             log_1.logSuccess(`Successfully versioned docs!`);
+            console.log(child_process_1.execSync(`cat .version-resource-history`).toString());
         }
         catch (error) {
             core.setFailed(error.message);

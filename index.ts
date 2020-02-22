@@ -55,6 +55,7 @@ const commentOnCommit = async (
 
 async function run(): Promise<void> {
   try {
+    console.log(execSync(`cat .version-resource-history`).toString())
     // First we need to version the resource
     const root = '.'
     const out = '.'
@@ -108,6 +109,8 @@ async function run(): Promise<void> {
     )
 
     logSuccess(`Successfully versioned docs!`)
+    console.log(execSync(`cat .version-resource-history`).toString())
+
   } catch (error) {
     core.setFailed(error.message)
   }
