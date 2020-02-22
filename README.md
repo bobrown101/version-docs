@@ -25,7 +25,7 @@ feature1/
 - `doc-location` represents the folder your auto-generated docs will be located at.
     For example if you ran `typedoc --out docsFoldername` on CI, your `doc-location` would be "docsFoldername"
 - `doc-branch` represents what git branch your docs will live at.
-    Common doc branches are named `docs` or `documentation`
+    Common doc branches are named `gh-pages`, `docs` or `documentation`
 ```
 - name: Version docs
   uses: bobrown101/version-docs@v2.0.8
