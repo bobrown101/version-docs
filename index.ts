@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import {execSync} from 'child_process'
-// import axios from 'axios'
-import {logError, logInfo} from './log'
+import axios from 'axios'
+import {logError, logInfo, logSuccess} from './log'
 
 const requireEnvVar = (envVar: string): string => {
   const requested = process.env[envVar]
@@ -29,29 +29,29 @@ const runCommand = (cmd: string, errorMsg?: string): string => {
   }
 }
 
-// const commentOnCommit = async (
-//   comment: string,
-//   token: string
-// ): Promise<void> => {
-//   const inputs = {
-//     token,
-//     body: comment
-//   }
-//   core.debug(`Inputs: ${JSON.stringify(inputs, null, 4)}`)
+const commentOnCommit = async (
+  comment: string,
+  token: string
+): Promise<void> => {
+  const inputs = {
+    token,
+    body: comment
+  }
+  core.debug(`Inputs: ${JSON.stringify(inputs, null, 4)}`)
 
-//   const sha = process.env.GITHUB_SHA
-//   core.debug(`SHA: ${sha}`)
+  const sha = process.env.GITHUB_SHA
+  core.debug(`SHA: ${sha}`)
 
-//   await axios.post(
-//     `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/commits/${sha}/comments`,
-//     {
-//       body: inputs.body
-//     },
-//     {
-//       headers: {authorization: `token ${inputs.token}`}
-//     }
-//   )
-// }
+  await axios.post(
+    `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/commits/${sha}/comments`,
+    {
+      body: inputs.body
+    },
+    {
+      headers: {authorization: `token ${inputs.token}`}
+    }
+  )
+}
 
 async function run(): Promise<void> {
   try {
@@ -63,8 +63,8 @@ async function run(): Promise<void> {
     const out = '.'
     const source = core.getInput('doc-location')
     const docsBranch = core.getInput('doc-branch')
-    // const commitMsg =
-    //   core.getInput('commitMsg') || 'docs: versioned docs via version-docs'
+    const commitMsg =
+      core.getInput('commitMsg') || 'docs: versioned docs via version-docs'
     const gitRef = requireEnvVar('GITHUB_REF')
     const gitBranch = gitRef.split('/')[2]
     const gitCommit = runCommand(`git log -1 --format="%h"`).trim()
@@ -86,7 +86,7 @@ async function run(): Promise<void> {
     versionResource(gitBranch, 'latest')
 
     // Then we copy the versioned-resources to the docs-branch location
-    runCommand(`rsync -a --remove-source-files ${gitBranch}/ /tmp/docsBranch/`)
+    runCommand(`rsync -a ${gitBranch}/ /tmp/docsBranch/`)
     runCommand(`mv .version-resource-history /tmp/docsBranch/`)
     try {
       runCommand(`mv index.html /tmp/docsBranch/`)
@@ -96,29 +96,14 @@ async function run(): Promise<void> {
       )
     }
 
-    console.log(execSync('pwd && ls -al').toString())
-    runCommand(`cd /tmp/docsBranch && pwd && ls -al`)
+    runCommand(`cd /tmp/docsBranch && git add -A && git commit -m "${commitMsg}" --no-verify && git push "${remoteRepo}" HEAD:${docsBranch}`)
 
-    // runCommand(`git commit -m "${commitMsg}" --no-verify`)
+    commentOnCommit(
+      `"version-docs" versioned "${source}" from branch "${gitBranch}" on documentation branch "${docsBranch}"`,
+      githubToken
+    )
 
-    // runCommand(`git fetch origin`)
-    // runCommand(
-    //   `git checkout remotes/origin/${docsBranch}`,
-    //   `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`
-    // )
-    // runCommand(`git cherry-pick temp/version-docs --strategy-option=theirs`)
-
-    // runCommand(
-    //   `git push "${remoteRepo}" HEAD:${docsBranch}`,
-    //   `Could not push docs to docsBranch ${docsBranch}`
-    // )
-
-    // commentOnCommit(
-    //   `"version-docs" versioned "${source}" from branch "${gitBranch}" on documentation branch "${docsBranch}"`,
-    //   githubToken
-    // )
-
-    // logSuccess(`Successfully versioned docs!`)
+    logSuccess(`Successfully versioned docs!`)
   } catch (error) {
     core.setFailed(error.message)
   }
