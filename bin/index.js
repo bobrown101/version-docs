@@ -4522,8 +4522,6 @@ function run() {
             const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN');
             const repo = requireEnvVar('GITHUB_REPOSITORY');
             const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${repo}.git`;
-            const root = '.';
-            const out = '.';
             const source = core.getInput('doc-location');
             const docsBranch = core.getInput('doc-branch');
             const commitMsg = core.getInput('commitMsg') || 'docs: versioned docs via version-docs';
@@ -4532,32 +4530,17 @@ function run() {
             const gitCommit = runCommand(`git log -1 --format="%h"`).trim();
             runCommand(`git config --local user.email "action@github.com"`);
             runCommand(`git config --local user.name "GitHub Action"`);
-            // First we need to clone the docs-branch
+            // First we need to clone the docs-branch into a temp git location
             runCommand(`git clone --single-branch --branch ${docsBranch} --depth 1 ${remoteRepo} /tmp/docsBranch`, `Could not find doc-branch: "${docsBranch}". If this was intentional, please create an empty branch named "${docsBranch}"`);
-            // Then we copy over the existing .version-resource-history file in order to preserve history
-            try {
-                child_process_1.execSync(`cp /tmp/docsBranch/.version-resource-history .`);
-            }
-            catch (error) {
-                log_1.logInfo('Cloud not find existing .version-resource-history. Ignoring...');
-            }
+            // then we copy the resource to be versioned to the temp git location
+            runCommand(`cp -r ${source} /tmp/docsBranch/`);
             // The we run version-resource
             const versionResource = (versionName, versionTag) => {
-                const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out} --versionName ${versionName} --versionTag ${versionTag} -p`;
+                const versionCommand = `cd /tmp/docsBranch && npx version-resource --root . --source ${source} --out . --versionName ${versionName} --versionTag ${versionTag} -p`;
                 runCommand(versionCommand);
             };
             versionResource(gitBranch, gitCommit);
             versionResource(gitBranch, 'latest');
-            // Then we copy the versioned-resources to the docs-branch location
-            runCommand(`mkdir -p /tmp/docsBranch/${gitBranch}/`);
-            runCommand(`rsync -a ${gitBranch}/ /tmp/docsBranch/${gitBranch}/`);
-            runCommand(`mv .version-resource-history /tmp/docsBranch/`);
-            try {
-                runCommand(`mv index.html /tmp/docsBranch/`);
-            }
-            catch (error) {
-                log_1.logInfo('Could not find index.html file - this would most likely happen if no -p flag was specified, or this is the first time version-docs has been run wuth the -p flag. Ignoring...');
-            }
             runCommand(`cd /tmp/docsBranch && git config --local user.email "action@github.com"`);
             runCommand(`cd /tmp/docsBranch && git config --local user.name "GitHub Action"`);
             runCommand(`cd /tmp/docsBranch && git add -A`);
