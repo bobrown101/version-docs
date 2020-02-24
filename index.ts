@@ -67,6 +67,7 @@ async function run(): Promise<void> {
     //   core.getInput('commitMsg') || 'docs: versioned docs via version-docs'
     const gitRef = requireEnvVar('GITHUB_REF')
     const gitBranch = gitRef.split('/')[2]
+    // const gitCommit = runCommand(`git log -1 --format="%h"`).trim()
 
     runCommand(`git config --local user.email "action@github.com"`)
     runCommand(`git config --local user.name "GitHub Action"`)
