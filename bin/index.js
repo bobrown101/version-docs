@@ -4534,6 +4534,14 @@ function run() {
             runCommand(`git config --local user.name "GitHub Action"`);
             // First we need to clone the docs-branch
             runCommand(`git clone --single-branch --branch ${docsBranch} --depth 1 ${remoteRepo} /tmp/docsBranch`, `Could not find doc-branch: "${docsBranch}". If this was intentional, please create an empty branch named "${docsBranch}"`);
+            // Then we copy over the existing .version-resource-history file in order to preserve history
+            try {
+                child_process_1.execSync(`cp /tmp/docsBranch/.version-resource-history .`);
+            }
+            catch (error) {
+                log_1.logInfo('Cloud not find existing .version-resource-history. Ignoring...');
+            }
+            // The we run version-resource
             const versionResource = (versionName, versionTag) => {
                 const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out} --versionName ${versionName} --versionTag ${versionTag} -p`;
                 runCommand(versionCommand);

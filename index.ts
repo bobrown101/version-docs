@@ -78,6 +78,14 @@ async function run(): Promise<void> {
       `Could not find doc-branch: "${docsBranch}". If this was intentional, please create an empty branch named "${docsBranch}"`
     )
 
+    // Then we copy over the existing .version-resource-history file in order to preserve history
+    try {
+      execSync(`cp /tmp/docsBranch/.version-resource-history .`)
+    } catch (error) {
+      logInfo('Cloud not find existing .version-resource-history. Ignoring...')
+    }
+
+    // The we run version-resource
     const versionResource = (versionName: string, versionTag: string): void => {
       const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out} --versionName ${versionName} --versionTag ${versionTag} -p`
       runCommand(versionCommand)
