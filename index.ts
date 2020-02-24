@@ -86,7 +86,8 @@ async function run(): Promise<void> {
     versionResource(gitBranch, 'latest')
 
     // Then we copy the versioned-resources to the docs-branch location
-    runCommand(`rsync -a ${gitBranch}/ /tmp/docsBranch/`)
+    runCommand(`mkdir -p /tmp/docsBranch/${gitBranch}/`)
+    runCommand(`rsync -a ${gitBranch}/ /tmp/docsBranch/${gitBranch}/`)
     runCommand(`mv .version-resource-history /tmp/docsBranch/`)
     try {
       runCommand(`mv index.html /tmp/docsBranch/`)
