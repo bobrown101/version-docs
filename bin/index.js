@@ -4534,13 +4534,15 @@ function run() {
             runCommand(`git clone --single-branch --branch ${docsBranch} --depth 1 ${remoteRepo} /tmp/docsBranch`, `Could not find doc-branch: "${docsBranch}". If this was intentional, please create an empty branch named "${docsBranch}"`);
             // then we copy the resource to be versioned to the temp git location
             runCommand(`cp -r ${source} /tmp/docsBranch/`);
-            // The we run version-resource
+            // Then we run version-resource
             const versionResource = (versionName, versionTag) => {
                 const versionCommand = `cd /tmp/docsBranch && npx version-resource --root . --source ${source} --out . --versionName ${versionName} --versionTag ${versionTag} -p`;
                 runCommand(versionCommand);
             };
             versionResource(gitBranch, gitCommit);
             versionResource(gitBranch, 'latest');
+            // then we delete the already versioned resource in the temp git location
+            runCommand(`rm -rf /tmp/docsBranch/${source}`);
             runCommand(`cd /tmp/docsBranch && git config --local user.email "action@github.com"`);
             runCommand(`cd /tmp/docsBranch && git config --local user.name "GitHub Action"`);
             runCommand(`cd /tmp/docsBranch && git add -A`);
