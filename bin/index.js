@@ -1666,14 +1666,17 @@ function run() {
             //   core.getInput('commitMsg') || 'docs: versioned docs via version-docs'
             const gitRef = requireEnvVar('GITHUB_REF');
             const gitBranch = gitRef.split('/')[2];
-            // const gitCommit = runCommand(`git log -1 --format="%h"`).trim()
+            const gitCommit = runCommand(`git lZog -1 --format="%h"`).trim();
             runCommand(`git config --local user.email "action@github.com"`);
             runCommand(`git config --local user.name "GitHub Action"`);
             // First we need to clone the docs-branch
             runCommand(`git clone --single-branch --branch ${docsBranch} --depth 1 ${remoteRepo} /tmp/docsBranch`, `Could not find doc-branch: "${docsBranch}". If this was intentional, please create an empty branch named "${docsBranch}"`);
-            // Then we need to version the resource
-            const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out} -p`;
-            runCommand(versionCommand);
+            const versionResource = (versionName, versionTag) => {
+                const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out} --versionName ${versionName} --versionTag ${versionTag} -p`;
+                runCommand(versionCommand);
+            };
+            versionResource(gitBranch, gitCommit);
+            versionResource(gitBranch, 'latest');
             // Then we copy the versioned-resources to the docs-branch location
             runCommand(`mv ${gitBranch} /tmp/docsBranch/`);
             runCommand(`mv .version-resource-history /tmp/docsBranch`);
