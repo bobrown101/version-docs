@@ -1687,8 +1687,7 @@ function run() {
                 log_1.logInfo('Could not find index.html file - this would most likely happen if no -p flag was specified, or this is the first time version-docs has been run wuth the -p flag. Ignoring...');
             }
             console.log(child_process_1.execSync('pwd && ls -al').toString());
-            runCommand(`cd /tmp/docsBranch `);
-            console.log(child_process_1.execSync('pwd && ls -al').toString());
+            runCommand(`cd /tmp/docsBranch && pwd && ls -al`);
             // runCommand(`git commit -m "${commitMsg}" --no-verify`)
             // runCommand(`git fetch origin`)
             // runCommand(

@@ -97,8 +97,7 @@ async function run(): Promise<void> {
     }
 
     console.log(execSync('pwd && ls -al').toString())
-    runCommand(`cd /tmp/docsBranch `)
-    console.log(execSync('pwd && ls -al').toString())
+    runCommand(`cd /tmp/docsBranch && pwd && ls -al`)
 
     // runCommand(`git commit -m "${commitMsg}" --no-verify`)
 
