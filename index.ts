@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import {execSync} from 'child_process'
-import axios from 'axios'
-import {logError, logSuccess, logInfo} from './log'
+// import axios from 'axios'
+import {logError, logInfo} from './log'
 
 const requireEnvVar = (envVar: string): string => {
   const requested = process.env[envVar]
@@ -29,82 +29,93 @@ const runCommand = (cmd: string, errorMsg?: string): string => {
   }
 }
 
-const commentOnCommit = async (
-  comment: string,
-  token: string
-): Promise<void> => {
-  const inputs = {
-    token,
-    body: comment
-  }
-  core.debug(`Inputs: ${JSON.stringify(inputs, null, 4)}`)
+// const commentOnCommit = async (
+//   comment: string,
+//   token: string
+// ): Promise<void> => {
+//   const inputs = {
+//     token,
+//     body: comment
+//   }
+//   core.debug(`Inputs: ${JSON.stringify(inputs, null, 4)}`)
 
-  const sha = process.env.GITHUB_SHA
-  core.debug(`SHA: ${sha}`)
+//   const sha = process.env.GITHUB_SHA
+//   core.debug(`SHA: ${sha}`)
 
-  await axios.post(
-    `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/commits/${sha}/comments`,
-    {
-      body: inputs.body
-    },
-    {
-      headers: {authorization: `token ${inputs.token}`}
-    }
-  )
-}
+//   await axios.post(
+//     `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/commits/${sha}/comments`,
+//     {
+//       body: inputs.body
+//     },
+//     {
+//       headers: {authorization: `token ${inputs.token}`}
+//     }
+//   )
+// }
 
 async function run(): Promise<void> {
   try {
-    // First we need to version the resource
+    const githubActor = requireEnvVar('GITHUB_ACTOR')
+    const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN')
+    const repo = requireEnvVar('GITHUB_REPOSITORY')
+    const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${repo}.git`
     const root = '.'
     const out = '.'
     const source = core.getInput('doc-location')
     const docsBranch = core.getInput('doc-branch')
-    const commitMsg =
-      core.getInput('commitMsg') || 'docs: versioned docs via version-docs'
+    // const commitMsg =
+    //   core.getInput('commitMsg') || 'docs: versioned docs via version-docs'
     const gitRef = requireEnvVar('GITHUB_REF')
     const gitBranch = gitRef.split('/')[2]
 
     runCommand(`git config --local user.email "action@github.com"`)
     runCommand(`git config --local user.name "GitHub Action"`)
 
+    // First we need to clone the docs-branch
+    runCommand(
+      `git clone --single-branch --branch ${docsBranch} --depth 1 ${remoteRepo} /tmp/docsBranch`,
+      `Could not find doc-branch: "${docsBranch}". If this was intentional, please create an empty branch named "${docsBranch}"`
+    )
+
+    // Then we need to version the resource
     const versionCommand = `npx version-resource --root ${root} --source ${source} --out ${out} -p`
     runCommand(versionCommand)
 
-    runCommand(`git checkout -b temp/version-docs`)
-    runCommand(`git add ${gitBranch}`)
-    // add index.html as this will allow for --pilot flag of version-resource
-    // add .version-resource-history to allow for correct pilot file generation
+    // Then we copy the versioned-resources to the docs-branch location
+    runCommand(`mv ${gitBranch} /tmp/docsBranch/`)
+    runCommand(`mv .version-resource-history /tmp/docsBranch`)
     try {
-      execSync(`git add index.html .version-resource-history`)
+      runCommand(`mv index.html /tmp/docsBranch`)
     } catch (error) {
-      logInfo("Could not find index.html and/or .version-resource-history file - this would most likely happen if no -p flag was specified, or this is the first time version-docs has been run wuth the -p flag. Ignoring...")
+      logInfo(
+        'Could not find index.html file - this would most likely happen if no -p flag was specified, or this is the first time version-docs has been run wuth the -p flag. Ignoring...'
+      )
     }
-    runCommand(`git commit -m "${commitMsg}" --no-verify`)
 
-    runCommand(`git fetch origin`)
-    runCommand(
-      `git checkout remotes/origin/${docsBranch}`,
-      `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`
-    )
-    runCommand(`git cherry-pick temp/version-docs --strategy-option=theirs`)
+    console.log(execSync('pwd && ls -al').toString())
+    runCommand(`cd /tmp/docsBranch `)
+    console.log(execSync('pwd && ls -al').toString())
 
-    const githubActor = requireEnvVar('GITHUB_ACTOR')
-    const githubToken = requireEnvVar('INPUT_GITHUB-TOKEN')
-    const repo = requireEnvVar('GITHUB_REPOSITORY')
-    const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${repo}.git`
+    // runCommand(`git commit -m "${commitMsg}" --no-verify`)
 
-    runCommand(
-      `git push "${remoteRepo}" HEAD:${docsBranch}`,
-      `Could not push docs to docsBranch ${docsBranch}`
-    )
+    // runCommand(`git fetch origin`)
+    // runCommand(
+    //   `git checkout remotes/origin/${docsBranch}`,
+    //   `Could not checkout branch ${docsBranch}. Are you sure it exists? If not please create it`
+    // )
+    // runCommand(`git cherry-pick temp/version-docs --strategy-option=theirs`)
 
-    commentOnCommit(
-      `"version-docs" versioned "${source}" from branch "${gitBranch}" on documentation branch "${docsBranch}"`,
-      githubToken
-    )
+    // runCommand(
+    //   `git push "${remoteRepo}" HEAD:${docsBranch}`,
+    //   `Could not push docs to docsBranch ${docsBranch}`
+    // )
 
-    logSuccess(`Successfully versioned docs!`)
+    // commentOnCommit(
+    //   `"version-docs" versioned "${source}" from branch "${gitBranch}" on documentation branch "${docsBranch}"`,
+    //   githubToken
+    // )
+
+    // logSuccess(`Successfully versioned docs!`)
   } catch (error) {
     core.setFailed(error.message)
   }
