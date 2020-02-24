@@ -4549,7 +4549,11 @@ function run() {
             catch (error) {
                 log_1.logInfo('Could not find index.html file - this would most likely happen if no -p flag was specified, or this is the first time version-docs has been run wuth the -p flag. Ignoring...');
             }
-            runCommand(`cd /tmp/docsBranch && git add -A && git commit -m "${commitMsg}" --no-verify && git push "${remoteRepo}" HEAD:${docsBranch}`);
+            runCommand(`cd /tmp/docsBranch && git config --local user.email "action@github.com"`);
+            runCommand(`cd /tmp/docsBranch && git config --local user.name "GitHub Action"`);
+            runCommand(`cd /tmp/docsBranch && git add -A`);
+            runCommand(`cd /tmp/docsBranch && git commit -m "${commitMsg}" --no-verify && git push "${remoteRepo}" HEAD:${docsBranch}`);
+            runCommand(`cd /tmp/docsBranch && git push "${remoteRepo}" HEAD:${docsBranch}`);
             commentOnCommit(`"version-docs" versioned "${source}" from branch "${gitBranch}" on documentation branch "${docsBranch}"`, githubToken);
             log_1.logSuccess(`Successfully versioned docs!`);
         }

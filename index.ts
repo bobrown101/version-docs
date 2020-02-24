@@ -96,13 +96,24 @@ async function run(): Promise<void> {
       )
     }
 
-    runCommand(`cd /tmp/docsBranch && git add -A && git commit -m "${commitMsg}" --no-verify && git push "${remoteRepo}" HEAD:${docsBranch}`)
+    runCommand(
+      `cd /tmp/docsBranch && git config --local user.email "action@github.com"`
+    )
+    runCommand(
+      `cd /tmp/docsBranch && git config --local user.name "GitHub Action"`
+    )
+    runCommand(`cd /tmp/docsBranch && git add -A`)
+    runCommand(
+      `cd /tmp/docsBranch && git commit -m "${commitMsg}" --no-verify && git push "${remoteRepo}" HEAD:${docsBranch}`
+    )
+    runCommand(
+      `cd /tmp/docsBranch && git push "${remoteRepo}" HEAD:${docsBranch}`
+    )
 
     commentOnCommit(
       `"version-docs" versioned "${source}" from branch "${gitBranch}" on documentation branch "${docsBranch}"`,
       githubToken
     )
-
     logSuccess(`Successfully versioned docs!`)
   } catch (error) {
     core.setFailed(error.message)
