@@ -1678,10 +1678,10 @@ function run() {
             versionResource(gitBranch, gitCommit);
             versionResource(gitBranch, 'latest');
             // Then we copy the versioned-resources to the docs-branch location
-            runCommand(`mv ${gitBranch} /tmp/docsBranch/`);
-            runCommand(`mv .version-resource-history /tmp/docsBranch`);
+            runCommand(`rsync -a --remove-source-files ${gitBranch}/ /tmp/docsBranch/`);
+            runCommand(`mv .version-resource-history /tmp/docsBranch/`);
             try {
-                runCommand(`mv index.html /tmp/docsBranch`);
+                runCommand(`mv index.html /tmp/docsBranch/`);
             }
             catch (error) {
                 log_1.logInfo('Could not find index.html file - this would most likely happen if no -p flag was specified, or this is the first time version-docs has been run wuth the -p flag. Ignoring...');
